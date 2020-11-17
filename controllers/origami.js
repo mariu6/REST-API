@@ -3,7 +3,7 @@ const models = require('../models');
 module.exports = {
     get: (req, res, next) => {
         const length = req.query.length? parseInt(req.query.length) : 20;
-        models.Origami.find().limit(length).populate("author")             // без populate ще върне само _id
+        models.Origami.find().limit(length).populate("author")             // без populate ще върне само _id.  limit(length) съм го приложил и на фронт-енда, така че не е задължителен тук.
             .then((origamies) => res.send(origamies))        // origamies.map(x => x.author.username)
             .catch(next);
     },

@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const Model = mongoose.model;
 const { String, Number, Boolean, ObjectId } = Schema.Types;
 
-const tokenBlacklist = new Schema({
+const tokenBlacklist = new Schema({      // блеклист държи дадените токени
     token: String
 });
 

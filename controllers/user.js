@@ -4,17 +4,22 @@ const utils = require('../utils');
 
 module.exports = {
     get: (req, res, next) => {
-        models.User.find()
-            .then((users) => res.send(users))
+        models.User.findById(req.query.id)         // req.query.id - за да върне само посочения потребител
+            .then((user) => res.send(user))
             .catch(next)
     },
 
     post: {
         register: (req, res, next) => {
             const { username, password } = req.body;
-            console.log(username, password)
+            console.log(username, password);
             models.User.create({ username, password })
-                .then((createdUser) => res.send(createdUser))   // да добавя токен до юзера? за да връща токен още при регистрация? .send(createdUser) => .send({createdUser, token}) 
+                .then((createdUser) => {
+                    // за да се логне още при регистрацията, създавам токен и го пращам в хедъра на респонса (или в куки, но хедъра е предпочетен от Валентин)
+                    const token = utils.jwt.createToken({ id: createdUser._id });
+                    // res.cookie(config.authCookieName, token).send(createdUser);    // така се праща куки като респонс към браузъра
+                    return res.header("Authorization", token).send(createdUser);             // а така се праща към хедър 
+                })   
                 .catch(next)
         },
 
@@ -29,7 +34,8 @@ module.exports = {
                     }
 
                     const token = utils.jwt.createToken({ id: user._id });
-                    res.cookie(config.authCookieName, token).send(user);    
+                    // res.cookie(config.authCookieName, token).send(user);    // така се праща куки като респонс към браузъра
+                    res.header("Authorization", token).send(user);             // а така се праща хедър  
                 })
                 .catch(next);
         },
