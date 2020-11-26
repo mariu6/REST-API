@@ -28,7 +28,9 @@ module.exports = (redirectAuthenticated = true) => {
                     return;
                 }
 
-                next(err);
+                res.send({
+                    status:false
+                });
             })
     }
 

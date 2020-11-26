@@ -1,6 +1,7 @@
 const models = require('../models');
 const config = require('../config/config');
 const utils = require('../utils');
+const jwt = require('../utils/jwt');
 
 module.exports = {
     get: (req, res, next) => {
@@ -19,8 +20,37 @@ module.exports = {
                     const token = utils.jwt.createToken({ id: createdUser._id });
                     // res.cookie(config.authCookieName, token).send(createdUser);    // така се праща куки като респонс към браузъра
                     return res.header("Authorization", token).send(createdUser);             // а така се праща към хедър 
-                })   
+                })
                 .catch(next)
+        },
+
+        verifyLogin: (req, res, next) => {     // проверка на всеки рефреш на браузъра (или раут, според както е направен фронтенда) дали юзера е логиннат
+            const token = req.body.token || '';
+
+            Promise.all([ jwt.verifyToken(token), models.TokenBlacklist.findOne({ token }) ])
+                .then(([data, blacklistToken]) => {
+                    if (blacklistToken) { return Promise.reject(new Error('blacklisted token')) }
+
+                    models.User.findById(data.id)
+                        .then((user) => {
+                            return res.send({
+                                status: true,
+                                user
+                            });
+                        });
+                })
+                .catch(err => {
+                    if (!redirectAuthenticated) { next(); return; }
+
+                    if (['token expired', 'blacklisted token', 'jwt must be provided'].includes(err.message)) {
+                        res.status(401).send('UNAUTHORIZED!');
+                        return;
+                    }
+
+                    res.send({
+                        status: false
+                    });
+                })
         },
 
         login: (req, res, next) => {
