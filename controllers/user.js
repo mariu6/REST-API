@@ -25,7 +25,7 @@ module.exports = {
         },
 
         verifyLogin: (req, res, next) => {     // проверка на всеки рефреш на браузъра (или раут, според както е направен фронтенда) дали юзера е логиннат
-            const token = req.body.token || '';
+            const token = req.headers.authorization || '';
 
             Promise.all([ jwt.verifyToken(token), models.TokenBlacklist.findOne({ token }) ])
                 .then(([data, blacklistToken]) => {
@@ -40,7 +40,6 @@ module.exports = {
                         });
                 })
                 .catch(err => {
-                    if (!redirectAuthenticated) { next(); return; }
 
                     if (['token expired', 'blacklisted token', 'jwt must be provided'].includes(err.message)) {
                         res.status(401).send('UNAUTHORIZED!');
