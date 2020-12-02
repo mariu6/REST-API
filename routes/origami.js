@@ -1,13 +1,14 @@
 const controllers = require('../controllers/');
 const router = require('express').Router();
 const { auth } = require('../utils');
+const { authNew } = require("../utils");
 
 router.get('/', controllers.origami.get);
 
-router.post('/', auth(), controllers.origami.post);
+router.post('/', authNew(), controllers.origami.post);
 
-router.put('/:id', auth(), controllers.origami.put);
+router.put('/:id', authNew(), controllers.origami.put);
 
-router.delete('/:id', auth(), controllers.origami.delete);
+router.delete('/:id', authNew(), controllers.origami.delete);
 
 module.exports = router;
